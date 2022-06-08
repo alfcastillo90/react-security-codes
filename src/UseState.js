@@ -2,7 +2,7 @@ import React from "react";
 
 const SECURITY_CODE = 'paradigma';
 
-function UseState ({ name }) {
+function UseState({ name }) {
     const [state, setState] = React.useState({
         value: '',
         error: false,
@@ -11,38 +11,72 @@ function UseState ({ name }) {
         confirmed: false
     });
 
-    console.log(state.value);
+    const onCheck = () => setState({
+        ...state,
+        loading: true
+    })
+
+    const onConfirm = () => {
+        setState({
+            ...state,
+            error: false,
+            loading: false,
+            confirmed: true
+        });
+    };
+
+    const onDelete = () => {
+        setState({
+            ...state,
+            deleted: true
+        })
+    };
+
+    const onError = () => {
+        setState({
+            ...state,
+            error: true,
+            loading: false
+        });
+    };
+
+    const onReset = () => {
+        setState({
+            ...state,
+            confirmed: false,
+            deleted: false,
+            value: ''
+        })
+    }
+
+    const onWrite = (value) => {
+        setState({
+            ...state,
+            value
+        })
+    }
 
     React.useEffect(() => {
         if (!!state.loading) {
             setTimeout(() => {
                 console.log('Haciendo la validación');
-                 if (state.value === SECURITY_CODE){
-                     setState({ 
-                        ...state,
-                        error: false,
-                        loading: false,
-                        confirmed: true
-                     });
-                 } else {
-                    setState({ 
-                        ...state,
-                        error: true,
-                        loading: false
-                    });
-                 }
+                if (state.value === SECURITY_CODE) {
+                    onConfirm();
+                } else {
+                    onError();
+                }
             }, 3000)
         }
 
         console.log('Terminando el efecto');
-    },[ state.loading ])
+    }, [state.loading])
 
     console.log(JSON.stringify(state));
 
     if (!state.deleted && !state.confirmed) {
-        return  (
+        return (
             <div>
-                <h2>Eliminar { name }</h2>
+                <h2>Eliminar {name}</h2>
                 <p>Por favor, escribe el código de seguridad.</p>
                 {(state.error && !state.loading) && (
                     <p>Error: el código es incorrecto</p>
@@ -52,18 +86,12 @@ function UseState ({ name }) {
                 )}
                 <input
                     onChange={(event) => {
-                        setState({
-                            ...state, 
-                            value: event.target.value 
-                        })
+                        onWrite(event.target.value);
                     }}
-                    placeholder = 'Código de seguridad'
-                    value = { state.value }/>
+                    placeholder='Código de seguridad'
+                    value={state.value} />
                 <button onClick={() => {
-                    setState({
-                        ...state,
-                        loading: true
-                    })
+                    onCheck();
                 }} >Comprobar</button>
             </div>
         )
@@ -73,27 +101,26 @@ function UseState ({ name }) {
                 <p>Pedimos confirmación. ¿Estas seguro?</p>
                 <button
                     onClick={() => {
-                        setState({
-                            ...state,
-                            deleted: true
-                        })
+                        onDelete();
                     }}
                 >Sí, eliminar</button>
                 <button
                     onClick={() => {
-                        setState({
-                            ...state,
-                            confirmed: true
-                        })
+                        onReset()
                     }}
                 >No, me arrepentí</button>
             </React.Fragment>
         );
-        
+
     } else {
         return (
             <React.Fragment>
                 <p>Eliminado con exito</p>
+                <button
+                    onClick={() => {
+                        onReset()
+                    }}
+                >Reiniciar, volver atrás</button>
             </React.Fragment>
         );
     }
