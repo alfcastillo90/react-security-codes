@@ -11,10 +11,12 @@ function UseState({ name }) {
         confirmed: false
     });
 
-    const onCheck = () => setState({
-        ...state,
-        loading: true
-    })
+    const onCheck = () => {
+        setState({
+            ...state,
+            loading: true
+        })
+    }
 
     const onConfirm = () => {
         setState({

@@ -8,23 +8,41 @@ const initialState = {
     confirmed: false
 };
 
+const actionTypes = {
+    check: 'CHECK',
+    confirm: 'CONFIRM',
+    delete: 'DELETE',
+    error: 'ERROR',
+    reset: 'RESET',
+    write: 'WRITE'
+};
+
 const SECURITY_CODE = 'paradigma';
 
 function UseReducer({ name }) {
     const [state, dispatch] = React.useReducer(reducer, initialState)
+
+    const onCheck = () => dispatch({ type: actionTypes.check });
+    const onConfirm = () => dispatch({ type: actionTypes.confirm });
+    const onDelete = () => dispatch({ type: actionTypes.delete });
+    const onError = () => dispatch({ type: actionTypes.error });
+    const onReset = () => dispatch({ type: actionTypes.reset });
+
+    const onWrite = (newValue) => {
+        dispatch({ 
+            type: actionTypes.write,
+            payload: newValue
+         })
+    };
 
     React.useEffect(() => {
         if (!!state.loading) {
             setTimeout(() => {
                 console.log('Haciendo la validación');
                 if (state.value === SECURITY_CODE) {
-                    dispatch({
-                        type: 'CONFIRM'
-                    });
+                   onConfirm();
                 } else {
-                    dispatch({
-                        type: 'ERROR'
-                    });
+                    onError();
                 }
             }, 3000)
         }
@@ -47,18 +65,11 @@ function UseReducer({ name }) {
                 )}
                 <input
                     onChange={(event) => {
-                        dispatch({
-                            type: 'WRITE',
-                            payload: event.target.value
-                        });
+                        onWrite(event.target.value);
                     }}
                     placeholder='Código de seguridad'
                     value={state.value} />
-                <button onClick={() => {
-                    dispatch({
-                        type: 'CHECK'
-                    });
-                }} >Comprobar</button>
+                <button onClick={onCheck} >Comprobar</button>
             </div>
         )
     } else if (!!state.confirmed && !state.deleted) {
@@ -66,18 +77,10 @@ function UseReducer({ name }) {
             <React.Fragment>
                 <p>Pedimos confirmación. ¿Estas seguro?</p>
                 <button
-                    onClick={() => {
-                        dispatch({
-                            type: 'DELETE'
-                        });
-                    }}
+                    onClick={onDelete}
                 >Sí, eliminar</button>
                 <button
-                    onClick={() => {
-                        dispatch({
-                            type: 'RESET'
-                        });
-                    }}
+                    onClick={onReset}
                 >No, me arrepentí</button>
             </React.Fragment>
         );
@@ -87,11 +90,7 @@ function UseReducer({ name }) {
             <React.Fragment>
                 <p>Eliminado con exito</p>
                 <button
-                    onClick={() => {
-                        dispatch({
-                            type: 'RESET'
-                        });
-                    }}
+                    onClick={onReset}
                 >Reiniciar, volver atrás</button>
             </React.Fragment>
         );
@@ -101,32 +100,32 @@ function UseReducer({ name }) {
 export { UseReducer }
 
 const reducerObject = (action, state) => ({
-    'CHECK': {
+    [actionTypes.check]: {
         ...state,
         loading: true
     },
-    'CONFIRM': {
+    [actionTypes.confirm] : {
         ...state,
         error: false,
         loading: false,
         confirmed: true
     },
-    'DELETE': {
+    [actionTypes.delete]: {
         ...state,
         deleted: true
     },
-    'ERROR': {
+    [actionTypes.error]: {
         ...state,
         error: true,
         loading: false
     },
-    'RESET': {
+    [actionTypes.reset]: {
         ...state,
         confirmed: false,
         deleted: false,
         value: ''
     },
-    'WRITE': {
+    [actionTypes.write]: {
         ...state,
         value: action.payload
     }
